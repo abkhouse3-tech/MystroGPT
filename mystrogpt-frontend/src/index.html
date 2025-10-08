@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MystroGPT — Quick Demo</title>
+  <!-- Tailwind CDN (dev/demo only) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 font-sans">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <header class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 flex items-center justify-center text-white font-bold">MG</div>
+        <div>
+          <h1 class="text-xl md:text-2xl font-bold">MystroGPT <span class="text-sm text-gray-500">— Where AI Thinks Like a Creator</span></h1>
+          <p class="text-xs text-gray-500">Local demo — Connects to http://localhost:8080</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="themeToggle" class="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700">Dark</button>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-2xl">Sign In</button>
+      </div>
+    </header>
+
+    <main class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section class="lg:col-span-1 space-y-4">
+        <div class="p-4 rounded-2xl shadow bg-white">
+          <h2 class="font-semibold">Prompt</h2>
+          <textarea id="prompt" rows="6" class="mt-2 w-full p-3 rounded-xl border border-gray-200 bg-transparent" placeholder="Type your creative brief..."></textarea>
+          <div class="mt-3 flex gap-2">
+            <button id="run" class="flex-1 bg-indigo-600 text-white rounded-xl px-4 py-2">Run</button>
+            <button id="clear" class="flex-1 border rounded-xl px-4 py-2">Clear</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="lg:col-span-2">
+        <div id="output" class="p-6 rounded-2xl shadow bg-white min-h-[300px]">
+          <div id="loading" class="hidden mb-4">
+            <div class="h-4 w-32 bg-gradient-to-r from-indigo-300 to-indigo-500 rounded-full animate-pulse mb-3"></div>
+            <div class="text-sm text-gray-500">Thinking like a creator...</div>
+          </div>
+
+          <div id="result" class="prose max-w-none">
+            <h2 class="text-lg font-semibold">Result will appear here</h2>
+            <p class="text-sm text-gray-500">Press Run to call local API (http://localhost:8080/run).</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="mt-8 text-sm text-gray-500 flex justify-between">
+      <div>© MystroGPT</div>
+      <div>Built with ♥ for creators</div>
+    </footer>
+  </div>
+
+  <script>
+    // theme toggle
+    const themeBtn = document.getElementById('themeToggle');
+    themeBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      themeBtn.textContent = document.documentElement.classList.contains('dark') ? 'Light' : 'Dark';
+    });
+
+    // backend call
+    const API = "http://localhost:8080/run";
+    async function callBackend(promptText) {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ prompt: promptText })
+      });
+      const js = await res.json();
+      if(js.ok) return js.result;
+      throw new Error(js.error || "Unknown error");
+    }
+
+    // UI handlers
+    const runBtn = document.getElementById('run');
+    const clearBtn = document.getElementById('clear');
+    const loading = document.getElementById('loading');
+    const result = document.getElementById('result');
+
+    runBtn.addEventListener('click', async () => {
+      loading.classList.remove('hidden');
+      result.style.opacity = 0.5;
+      try {
+        const prompt = document.getElementById('prompt').value.trim() || "एक 10 मिनट का cinematic YouTube script";
+        const out = await callBackend(prompt);
+        result.innerHTML = `<h3 class="text-lg font-semibold">${out.title || 'Result'}</h3><p>${out.text || JSON.stringify(out)}</p>`;
+      } catch(err) {
+        result.innerHTML = `<div class="text-red-500">Error: ${err.message}</div>`;
+      } finally {
+        loading.classList.add('hidden');
+        result.style.opacity = 1;
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      document.getElementById('prompt').value = '';
+      result.innerHTML = `<h2 class="text-lg font-semibold">Result will appear here</h2><p class="text-sm text-gray-500">Press Run to call local API (http://localhost:8080/run).</p>`;
+    });
+  </script>
+</body>
+</html>

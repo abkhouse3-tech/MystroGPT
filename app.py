@@ -25,7 +25,8 @@ import datetime
 import textwrap
 import argparse
 import re
-
+import os
+os.environ["PORT"] = os.getenv("PORT", "8080")
 
 def sanitize_folder_name(s: str) -> str:
     s = s.strip().lower()
@@ -205,14 +206,56 @@ class MystroGPTBrain:
         return payload
 
 
-# quick CLI demo
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run MystroGPT v1 pipeline (prototype)")
-    parser.add_argument("--topic", type=str, default="default", help="Topic text or title (optional)")
-    args = parser.parse_args()
+# --- Streamlit UI wrapper (replace your top-level argparse/demo block with this) ---
+import streamlit as st
 
-    brain = MystroGPTBrain(persona_name="MystroGPT")
-    out = brain.run_pipeline(args.topic)
-    print(f"Generated outputs saved to: {out.get('_saved_folder')}")
-    print("Available items:", ", ".join([k for k in out.keys() if not k.startswith("__")]))
+# Page config
+st.set_page_config(page_title="MystroGPT", layout="wide")
+st.title("MystroGPT")
+st.markdown("Enter a topic and click **Run pipeline** to generate outputs (script, shorts, thumbnail concept, SEO pack, etc.).")
+
+# Input
+topic_input = st.text_input("Topic / Title", value="default topic")
+
+if st.button("Run pipeline"):
+    if not topic_input or topic_input.strip() == "":
+        st.warning("Please enter a topic/title first.")
+    else:
+        with st.spinner("Running pipeline (this may take a minute)..."):
+            try:
+                # Import/create your brain — adjust if your class is in a different module
+                brain = MystroGPTBrain(persona_name="MystroGPT")
+
+                # Run pipeline (use the same signature your code expects)
+                out = brain.run_pipeline(topic_input.strip())
+
+                # Show success + where files were saved
+                saved_folder = out.get("_saved_folder", "outputs/default")
+                st.success(f"Done — generated outputs saved to: {saved_folder}")
+
+                # Show available keys (filter internal/private keys)
+                filtered = {k: v for k, v in out.items() if not k.startswith("__")}
+                st.subheader("Generated items (preview)")
+                st.json(filtered)
+
+                # Optional: show links / quick downloads if outputs are files inside outputs/
+                # Example: if your pipeline creates outputs/<folder>/script_hindi.json etc.
+                try:
+                    import os
+                    outdir = os.path.join("outputs", saved_folder) if not os.path.isabs(saved_folder) else saved_folder
+                    if os.path.exists(outdir):
+                        st.write("Files in output folder:")
+                        for f in sorted(os.listdir(outdir)):
+                            st.write(f"- " + f)
+                except Exception:
+                    pass
+
+            except Exception as e:
+                st.error(f"Pipeline failed: {e}")
+                # also show traceback in expander
+                import traceback
+                with st.expander("Show error details"):
+                    st.text(traceback.format_exc())
+
+
 
