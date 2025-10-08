@@ -5,3 +5,4 @@ venv/
 .vscode/
 client_secret*.json
 httpsgithub.comabkhouse3-techMystro.txt
+credentials/*.json
