@@ -32,3 +32,5 @@ jobs:
             --region asia-south1 \
             --allow-unauthenticated \
             --port 8080
+
+  workflow_dispatch:
