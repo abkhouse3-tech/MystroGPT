@@ -1,0 +1,36 @@
+name: Deploy MystroGPT to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+      - backup-main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: opportune-iris-467218-r0
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Build and Push Docker image
+        run: |
+          gcloud builds submit --tag gcr.io/opportune-iris-467218-r0/mystrogpt:latest .
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy mystrogpt \
+            --image gcr.io/opportune-iris-467218-r0/mystrogpt:latest \
+            --platform managed \
+            --region asia-south1 \
+            --allow-unauthenticated \
+            --port 8080
