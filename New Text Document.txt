@@ -1,0 +1,7 @@
+{
+  "type": "email",
+  "displayName": "MystroApp - Email Alerts",
+  "labels": {
+    "email_address": "mrarose52@gmail.com"
+  }
+}

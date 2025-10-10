@@ -1,0 +1,17 @@
+﻿{
+    "type":  "email",
+    "displayName":  "MystroApp Email Alerts",
+    "labels":  {
+                   "email_address":  "mrarose52@gmail.com"
+               },
+    "name":  "projects/opportune-iris-467218-r0/notificationChannels/11134139907791086876",
+    "enabled":  true,
+    "creationRecord":  {
+                           "mutateTime":  "2025-10-09T13:17:21.316920049Z"
+                       },
+    "mutationRecords":  [
+                            {
+                                "mutateTime":  "2025-10-09T13:17:21.316920049Z"
+                            }
+                        ]
+}
