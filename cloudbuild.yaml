@@ -2,6 +2,10 @@ substitutions:
   _SERVICE_NAME: "mystrogpt"   # Cloud Run service name
   _REGION: "asia-south1"      # Region (you can change to your actual region)
 
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+
 steps:
   # Step 1: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
